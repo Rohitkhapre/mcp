@@ -1,9 +1,21 @@
 # JumpServer MCP Server
 
-Every developer connects with their own JumpServer **Access Key**, so every action they take
-through this MCP server is attributed to their own account in JumpServer's audit/operation logs —
-not a shared service credential. This is the recommended setup; an older Bearer-token flow is
-also documented further down for reference, but Access Key is what you want.
+Expose JumpServer's API to any MCP-compatible AI client (Claude Code, Claude Desktop, Cursor,
+and others) as a set of callable tools — so an assistant can look up assets, check permissions,
+or investigate an incident directly against your JumpServer instance.
+
+Every developer connects with their own JumpServer **Access Key**, so every action taken through
+this server is attributed to their own account in JumpServer's audit/operation logs — not a
+shared service credential. Each developer's access is exactly whatever their own JumpServer role
+already permits: nothing more, nothing less.
+
+## Contents
+
+1. [Generate an Access Key](#1-generate-an-access-key-each-developer-does-this-themselves)
+2. [Use it in your MCP client](#2-use-it-in-your-mcp-client)
+3. [Configure and start the server](#3-configure-and-start-the-server-once-by-whoever-runs-it)
+4. [Gate the MCP server itself (optional)](#4-optional-gate-the-mcp-server-itself)
+5. [Bearer login token (alternative)](#bearer-login-token-alternative-not-recommended-if-mfa-is-enabled)
 
 ## 1. Generate an Access Key (each developer does this themselves)
 
@@ -14,12 +26,12 @@ also documented further down for reference, but Access Key is what you want.
 
 This is entirely self-service: no admin has to create anything, and it works whether or not MFA
 is enabled on your account (MFA only gates the username/password login flow used to mint a
-Bearer token — see the "Bearer login token" section below for why that matters).
+Bearer token — see [Bearer login token](#bearer-login-token-alternative-not-recommended-if-mfa-is-enabled)
+for why that matters).
 
 ## 2. Use it in your MCP client
 
-Add your key as two headers in your MCP client config (Claude Code, Claude Desktop, Cursor, or
-any other MCP client that supports custom SSE headers):
+Add your key as two headers in your MCP client config:
 
 ```json
 {
@@ -43,7 +55,7 @@ JumpServer role/permissions are exactly what their MCP session can do, nothing m
 ## 3. Configure and start the server (once, by whoever runs it)
 
 The server itself needs one credential of its own, used only once at startup to fetch the API
-schema (which tools exist) — this is a single service-account credential, unrelated to any
+schema (which tools exist). This is a single service-account credential, unrelated to any
 developer's own key from step 1:
 
 ```txt
